@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/h1_arm_sdk_dds_example.dir/example/humanoid/high_level/h1_arm_sdk_dds_example.cpp.o"
+  "CMakeFiles/h1_arm_sdk_dds_example.dir/example/humanoid/high_level/h1_arm_sdk_dds_example.cpp.o.d"
   "h1_arm_sdk_dds_example"
   "h1_arm_sdk_dds_example.pdb"
 )

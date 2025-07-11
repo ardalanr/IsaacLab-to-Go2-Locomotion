@@ -54,9 +54,13 @@ class StateEstimator:
         
         # 这里腿的顺序为什么要转换？
         # reverse legs
-        self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+        # self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+        # self.joint_idxs = [0, 2, 1, 3, 4, 6, 5, 7, 8, 10, 9, 11]  #   <--- IsaacLab policy
         self.contact_idxs = [1, 0, 3, 2]
+        # import pdb; pdb.set_trace()
         # self.joint_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        # self.joint_idxs = [0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11]
+        self.joint_idxs = [0, 2, 1, 3, 4, 6, 5, 7, 8, 10, 9, 11] # go2_config.py to isaac lab
 
         self.lc = lc
 
@@ -266,7 +270,7 @@ class StateEstimator:
             print(f"First legdata: {time.time() - self.init_time}")
 
         msg = leg_control_data_lcmt.decode(data)
-        # print(msg.q)
+        # print('MESSAGE q', msg.q)
         self.joint_pos = np.array(msg.q)
         self.joint_vel = np.array(msg.qd)
         self.tau_est = np.array(msg.tau_est)

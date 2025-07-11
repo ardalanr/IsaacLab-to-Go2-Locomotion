@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/stand_example_b2.dir/example/low_level/stand_example_b2.cpp.o"
+  "CMakeFiles/stand_example_b2.dir/example/low_level/stand_example_b2.cpp.o.d"
   "stand_example_b2"
   "stand_example_b2.pdb"
 )

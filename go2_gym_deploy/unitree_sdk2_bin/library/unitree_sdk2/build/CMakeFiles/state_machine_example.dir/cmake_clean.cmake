@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/state_machine_example.dir/example/state_machine/main.cpp.o"
+  "CMakeFiles/state_machine_example.dir/example/state_machine/main.cpp.o.d"
   "state_machine_example"
   "state_machine_example.pdb"
 )

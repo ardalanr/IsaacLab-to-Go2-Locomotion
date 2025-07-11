@@ -155,6 +155,9 @@ int Custom::queryServiceStatus(const std::string& serviceName)
     for (i=0; i<count; i++)
     {
         const unitree::robot::go2::ServiceState& serviceState = serviceStateList[i];
+        std::cout << "Service State " << i << ":" << std::endl;
+        std::cout << "  Name: " << serviceStateList[i].name << std::endl;
+        std::cout << "  Status: " << serviceStateList[i].status << std::endl;
         if(serviceState.name == serviceName)
         {
             if(serviceState.status == 0)

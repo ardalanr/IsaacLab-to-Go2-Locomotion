@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/high_follow_sin.dir/example/high_level/follow_sin.cpp.o"
+  "CMakeFiles/high_follow_sin.dir/example/high_level/follow_sin.cpp.o.d"
   "high_follow_sin"
   "high_follow_sin.pdb"
 )

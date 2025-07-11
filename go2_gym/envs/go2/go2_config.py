@@ -13,7 +13,7 @@ def config_go2(Cnfg: Union[Cfg, Meta]):
         'FL_hip_joint': 0.1,  # [rad]
         'RL_hip_joint': 0.1,  # [rad]
         'FR_hip_joint': -0.1,  # [rad]
-        'RR_hip_joint': -0.1,  # [rad]
+        'RR_hip_joint': -0.1,  # [rad]                             
 
         'FL_thigh_joint': 0.8,  # [rad]
         'RL_thigh_joint': 1.,  # [rad]

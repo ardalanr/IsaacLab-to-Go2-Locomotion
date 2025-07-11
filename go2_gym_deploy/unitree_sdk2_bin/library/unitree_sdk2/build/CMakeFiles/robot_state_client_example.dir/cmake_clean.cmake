@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/robot_state_client_example.dir/example/client/robot_state_client_example.cpp.o"
+  "CMakeFiles/robot_state_client_example.dir/example/client/robot_state_client_example.cpp.o.d"
   "robot_state_client_example"
   "robot_state_client_example.pdb"
 )
