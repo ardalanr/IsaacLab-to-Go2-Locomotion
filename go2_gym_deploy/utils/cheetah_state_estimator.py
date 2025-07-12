@@ -54,7 +54,7 @@ class StateEstimator:
         
         # 这里腿的顺序为什么要转换？
         # reverse legs
-        self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+        self.joint_idxs = [0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11]
         self.contact_idxs = [1, 0, 3, 2]
         # self.joint_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
