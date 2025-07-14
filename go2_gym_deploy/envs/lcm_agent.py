@@ -60,7 +60,6 @@ class LCMAgent():
              self.obs_scales["stance_length_cmd"], self.obs_scales["aux_reward_cmd"], 1, 1, 1, 1, 1, 1
              ])[:self.num_commands]
 
-
         joint_names = [
             "FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
             "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint",
@@ -122,7 +121,7 @@ class LCMAgent():
     def set_probing(self, is_currently_probing):
         self.is_currently_probing = is_currently_probing
 
-    def get_obs(self):
+    def get_obs(self, joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
 
         self.gravity_vector = self.se.get_gravity_vector()
         cmds, reset_timer = self.command_profile.get_command(self.timestep * self.dt, probe=self.is_currently_probing)
@@ -131,14 +130,16 @@ class LCMAgent():
             self.reset_gait_indices()
         #else:
         #    self.commands[:, 0:3] = self.command_profile.get_command(self.timestep * self.dt)[0:3]
-        self.dof_pos = self.se.get_dof_pos()
-        self.dof_vel = self.se.get_dof_vel()
+        self.dof_pos = self.se.get_dof_pos()[joint_idx]
+        self.dof_vel = self.se.get_dof_vel()[joint_idx]
         self.body_linear_vel = self.se.get_body_linear_vel()
         self.body_angular_vel = self.se.get_body_angular_vel()
 
-        ob = np.concatenate((self.gravity_vector.reshape(1, -1),
+        ob = np.concatenate((self.body_linear_vel.reshape(1, -1), 
+                             self.body_angular_vel.reshape(1, -1), 
+                             self.gravity_vector.reshape(1, -1),
                              self.commands * self.commands_scale,
-                             (self.dof_pos - self.default_dof_pos).reshape(1, -1) * self.obs_scales["dof_pos"],
+                             (self.dof_pos - self.default_dof_pos[joint_idx]).reshape(1, -1) * self.obs_scales["dof_pos"],
                              self.dof_vel.reshape(1, -1) * self.obs_scales["dof_vel"],
                              torch.clip(self.actions, -self.cfg["normalization"]["clip_actions"],
                                         self.cfg["normalization"]["clip_actions"]).cpu().detach().numpy().reshape(1, -1)
@@ -153,11 +154,11 @@ class LCMAgent():
                             self.clock_inputs), axis=1)
             # print(self.clock_inputs)
 
-        if self.cfg["env"]["observe_vel"]:
-            ob = np.concatenate(
-                (self.body_linear_vel.reshape(1, -1) * self.obs_scales["lin_vel"],
-                 self.body_angular_vel.reshape(1, -1) * self.obs_scales["ang_vel"],
-                 ob), axis=1)
+        # if self.cfg["env"]["observe_vel"]:
+        #     ob = np.concatenate(
+        #         (self.body_linear_vel.reshape(1, -1) * self.obs_scales["lin_vel"],
+        #          self.body_angular_vel.reshape(1, -1) * self.obs_scales["ang_vel"],
+        #          ob), axis=1)
 
         if self.cfg["env"]["observe_only_lin_vel"]:
             ob = np.concatenate(
@@ -186,12 +187,12 @@ class LCMAgent():
     def get_privileged_observations(self):
         return None
 
-    def publish_action(self, action, hard_reset=False):
+    def publish_action(self, action, hard_reset=False, inv_joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
 
         command_for_robot = pd_tau_targets_lcmt()
         self.joint_pos_target = \
             (action[0, :12].detach().cpu().numpy() * self.cfg["control"]["action_scale"]).flatten()
-        self.joint_pos_target[[0, 3, 6, 9]] *= self.cfg["control"]["hip_scale_reduction"]
+        self.joint_pos_target[[0, 1, 2, 3]] *= self.cfg["control"]["hip_scale_reduction"]
         # self.joint_pos_target[[0, 3, 6, 9]] *= -1
         self.joint_pos_target = self.joint_pos_target
         self.joint_pos_target += self.default_dof_pos
@@ -199,8 +200,8 @@ class LCMAgent():
         self.joint_vel_target = np.zeros(12)
         # print(f'cjp {self.joint_pos_target}')
 
-        command_for_robot.q_des = joint_pos_target
-        command_for_robot.qd_des = self.joint_vel_target
+        command_for_robot.q_des = joint_pos_target[inv_joint_idx]
+        command_for_robot.qd_des = self.joint_vel_target[inv_joint_idx]
         command_for_robot.kp = self.p_gains
         command_for_robot.kd = self.d_gains
         command_for_robot.tau_ff = np.zeros(12)
@@ -225,42 +226,42 @@ class LCMAgent():
     def reset_gait_indices(self):
         self.gait_indices = torch.zeros(self.num_envs, dtype=torch.float)
 
-    def step(self, actions, hard_reset=False):
+    def step(self, actions, hard_reset=False, joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], inv_joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
         clip_actions = self.cfg["normalization"]["clip_actions"]
         self.last_actions = self.actions[:]
         self.actions = torch.clip(actions[0:1, :], -clip_actions, clip_actions)
-        self.publish_action(self.actions, hard_reset=hard_reset)
+        self.publish_action(self.actions, hard_reset=hard_reset, inv_joint_idx=inv_joint_idx)
         time.sleep(max(self.dt - (time.time() - self.time), 0))
         if self.timestep % 100 == 0: print(f'frq: {1 / (time.time() - self.time)} Hz')
         self.time = time.time()
-        obs = self.get_obs()
+        obs = self.get_obs(joint_idx=joint_idx)
 
         # clock accounting
-        frequencies = self.commands[:, 4]
-        phases = self.commands[:, 5]
-        offsets = self.commands[:, 6]
-        if self.num_commands == 8:
-            bounds = 0
-            durations = self.commands[:, 7]
-        else:
-            bounds = self.commands[:, 7]
-            durations = self.commands[:, 8]
-        self.gait_indices = torch.remainder(self.gait_indices + self.dt * frequencies, 1.0)
+        # frequencies = self.commands[:, 4]
+        # phases = self.commands[:, 5]
+        # offsets = self.commands[:, 6]
+        # if self.num_commands == 8:
+        #     bounds = 0
+        #     durations = self.commands[:, 7]
+        # else:
+        #     bounds = self.commands[:, 7]
+        #     durations = self.commands[:, 8]
+        # self.gait_indices = torch.remainder(self.gait_indices + self.dt * frequencies, 1.0)
 
-        if "pacing_offset" in self.cfg["commands"] and self.cfg["commands"]["pacing_offset"]:
-            self.foot_indices = [self.gait_indices + phases + offsets + bounds,
-                                 self.gait_indices + bounds,
-                                 self.gait_indices + offsets,
-                                 self.gait_indices + phases]
-        else:
-            self.foot_indices = [self.gait_indices + phases + offsets + bounds,
-                                 self.gait_indices + offsets,
-                                 self.gait_indices + bounds,
-                                 self.gait_indices + phases]
-        self.clock_inputs[:, 0] = torch.sin(2 * np.pi * self.foot_indices[0])
-        self.clock_inputs[:, 1] = torch.sin(2 * np.pi * self.foot_indices[1])
-        self.clock_inputs[:, 2] = torch.sin(2 * np.pi * self.foot_indices[2])
-        self.clock_inputs[:, 3] = torch.sin(2 * np.pi * self.foot_indices[3])
+        # if "pacing_offset" in self.cfg["commands"] and self.cfg["commands"]["pacing_offset"]:
+        #     self.foot_indices = [self.gait_indices + phases + offsets + bounds,
+        #                          self.gait_indices + bounds,
+        #                          self.gait_indices + offsets,
+        #                          self.gait_indices + phases]
+        # else:
+        #     self.foot_indices = [self.gait_indices + phases + offsets + bounds,
+        #                          self.gait_indices + offsets,
+        #                          self.gait_indices + bounds,
+        #                          self.gait_indices + phases]
+        # self.clock_inputs[:, 0] = torch.sin(2 * np.pi * self.foot_indices[0])
+        # self.clock_inputs[:, 1] = torch.sin(2 * np.pi * self.foot_indices[1])
+        # self.clock_inputs[:, 2] = torch.sin(2 * np.pi * self.foot_indices[2])
+        # self.clock_inputs[:, 3] = torch.sin(2 * np.pi * self.foot_indices[3])
 
 # 注释掉了下面camera相关代码
 # --------------------------------------------------------------------

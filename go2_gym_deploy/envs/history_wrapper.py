@@ -17,8 +17,8 @@ class HistoryWrapper:
                                        device=self.env.device, requires_grad=False)
         self.num_privileged_obs = self.env.num_privileged_obs
 
-    def step(self, action):
-        obs, rew, done, info = self.env.step(action)
+    def step(self, action, joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], inv_joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
+        obs, rew, done, info = self.env.step(action, joint_idx, inv_joint_idx)
         privileged_obs = info["privileged_obs"]
 
         self.obs_history = torch.cat((self.obs_history[:, self.env.num_obs:], obs), dim=-1)

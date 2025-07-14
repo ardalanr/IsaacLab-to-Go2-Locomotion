@@ -19,7 +19,7 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
     logdir = sorted(dirs)[0]
 
 # with open(logdir+"/parameters.pkl", 'rb') as file:
-    with open(logdir+"/parameters.pkl", 'rb') as file:
+    with open(logdir+"/parameters_isaaclab.pkl", 'rb') as file:
         pkl_cfg = pkl.load(file)
         print(pkl_cfg.keys())
         cfg = pkl_cfg["Cfg"]
@@ -61,17 +61,26 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
 
 def load_policy(logdir):
     # try ------------------
-    # body = torch.jit.load(logdir + '/checkpoints/body_latest.jit').to('cpu')
-    body = torch.jit.load(logdir + '/checkpoints/body_latest.jit')
+    body = torch.jit.load(logdir + '/checkpoints/policy_rough.pt')
+    # body = torch.jit.load(logdir + '/checkpoints/policy.pt')
+    # body = torch.jit.load(logdir + '/checkpoints/body_latest.jit')
 
     import os
     adaptation_module = torch.jit.load(logdir + '/checkpoints/adaptation_module_latest.jit').to('cpu')
 
+    # print("--- Body Graph ---")
+    # print(body._get_method("forward").graph)
+    # print("------------------")
+
     def policy(obs, info):
         i = 0
-        latent = adaptation_module.forward(obs["obs_history"].to('cpu'))
-        action = body.forward(torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1))
-        info['latent'] = latent
+        # import pdb; pdb.set_trace()
+        # latent = adaptation_module.forward(obs["obs_history"].to('cpu'))
+        # action = body.forward(torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1))
+        
+        # input_tensor = torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1)
+        action = body.forward(obs["obs"])
+        info['latent'] = None
         return action
 
     return policy

@@ -70,10 +70,9 @@ class DeploymentRunner:
                 agent.get_obs()
                 joint_pos = agent.dof_pos
                 if low:
-                    final_goal = np.array([0., 0.3, -0.7,
-                                           0., 0.3, -0.7,
-                                           0., 0.3, -0.7,
-                                           0., 0.3, -0.7,])
+                    final_goal = np.array([0., 0., 0., 0.,
+                                           0.3, 0.3, 0.3, 0.3,
+                                           -0.7, -0.7, -0.7, -0.7,])
                 else:
                     final_goal = np.zeros(12)
                 nominal_joint_pos = agent.default_dof_pos
@@ -101,7 +100,7 @@ class DeploymentRunner:
                         hip_reduction = agent.cfg.control.hip_scale_reduction
                         action_scale = agent.cfg.control.action_scale
 
-                    next_target[[0, 3, 6, 9]] /= hip_reduction
+                    next_target[[0, 1, 2, 3]] /= hip_reduction
                     next_target = next_target / action_scale
                     cal_action[:, 0:12] = next_target
                     agent.step(torch.from_numpy(cal_action))
@@ -147,7 +146,7 @@ class DeploymentRunner:
                 action = self.policy(control_obs, policy_info)
 
                 for agent_name in self.agents.keys():
-                    obs, ret, done, info = self.agents[agent_name].step(action)
+                    obs, ret, done, info = self.agents[agent_name].step(action, joint_idx=[0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11], inv_joint_idx=[0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11])
 
                     info.update(policy_info)
                     info.update({"observation": obs, "reward": ret, "done": done, "timestep": i,
