@@ -130,17 +130,17 @@ class LCMAgent():
             self.reset_gait_indices()
         #else:
         #    self.commands[:, 0:3] = self.command_profile.get_command(self.timestep * self.dt)[0:3]
-        self.dof_pos = self.se.get_dof_pos()[joint_idx]
-        self.dof_vel = self.se.get_dof_vel()[joint_idx]
+        self.dof_pos = self.se.get_dof_pos()
+        self.dof_vel = self.se.get_dof_vel()
         self.body_linear_vel = self.se.get_body_linear_vel()
         self.body_angular_vel = self.se.get_body_angular_vel()
 
-        ob = np.concatenate((self.body_linear_vel.reshape(1, -1), 
-                             self.body_angular_vel.reshape(1, -1), 
+        ob = np.concatenate((self.body_linear_vel.reshape(1, -1)*self.obs_scales["lin_vel"], 
+                             self.body_angular_vel.reshape(1, -1)*self.obs_scales["ang_vel"], 
                              self.gravity_vector.reshape(1, -1),
                              self.commands * self.commands_scale,
-                             (self.dof_pos - self.default_dof_pos[joint_idx]).reshape(1, -1) * self.obs_scales["dof_pos"],
-                             self.dof_vel.reshape(1, -1) * self.obs_scales["dof_vel"],
+                             (self.dof_pos[joint_idx] - self.default_dof_pos[joint_idx]).reshape(1, -1) * self.obs_scales["dof_pos"],
+                             self.dof_vel[joint_idx].reshape(1, -1) * self.obs_scales["dof_vel"],
                              torch.clip(self.actions, -self.cfg["normalization"]["clip_actions"],
                                         self.cfg["normalization"]["clip_actions"]).cpu().detach().numpy().reshape(1, -1)
                              ), axis=1)
@@ -194,14 +194,14 @@ class LCMAgent():
             (action[0, :12].detach().cpu().numpy() * self.cfg["control"]["action_scale"]).flatten()
         self.joint_pos_target[[0, 1, 2, 3]] *= self.cfg["control"]["hip_scale_reduction"]
         # self.joint_pos_target[[0, 3, 6, 9]] *= -1
-        self.joint_pos_target = self.joint_pos_target
+        self.joint_pos_target = self.joint_pos_target[inv_joint_idx]
         self.joint_pos_target += self.default_dof_pos
         joint_pos_target = self.joint_pos_target[self.joint_idxs]
         self.joint_vel_target = np.zeros(12)
         # print(f'cjp {self.joint_pos_target}')
 
         command_for_robot.q_des = joint_pos_target[inv_joint_idx]
-        command_for_robot.qd_des = self.joint_vel_target[inv_joint_idx]
+        command_for_robot.qd_des = self.joint_vel_target
         command_for_robot.kp = self.p_gains
         command_for_robot.kd = self.d_gains
         command_for_robot.tau_ff = np.zeros(12)

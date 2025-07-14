@@ -79,7 +79,7 @@ def load_policy(logdir):
         # action = body.forward(torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1))
         
         # input_tensor = torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1)
-        action = body.forward(obs["obs"])
+        action = body.forward(obs["obs"].to('cpu'))
         info['latent'] = None
         return action
 

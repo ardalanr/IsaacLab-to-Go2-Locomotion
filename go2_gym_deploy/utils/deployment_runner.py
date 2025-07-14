@@ -143,6 +143,8 @@ class DeploymentRunner:
             for i in range(max_steps):
 
                 policy_info = {}
+                # import pdb; pdb.set_trace()
+                control_obs = self.agents['hardware_closed_loop'].get_obs(joint_idx=[0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11])
                 action = self.policy(control_obs, policy_info)
 
                 for agent_name in self.agents.keys():
