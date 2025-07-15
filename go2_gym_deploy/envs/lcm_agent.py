@@ -135,7 +135,7 @@ class LCMAgent():
         self.body_linear_vel = self.se.get_body_linear_vel()
         self.body_angular_vel = self.se.get_body_angular_vel()
 
-        ob = np.concatenate((self.body_linear_vel.reshape(1, -1)*self.obs_scales["lin_vel"], 
+        ob = np.concatenate(( 
                              self.body_angular_vel.reshape(1, -1)*self.obs_scales["ang_vel"], 
                              self.gravity_vector.reshape(1, -1),
                              self.commands * self.commands_scale,
@@ -160,10 +160,10 @@ class LCMAgent():
         #          self.body_angular_vel.reshape(1, -1) * self.obs_scales["ang_vel"],
         #          ob), axis=1)
 
-        if self.cfg["env"]["observe_only_lin_vel"]:
-            ob = np.concatenate(
-                (self.body_linear_vel.reshape(1, -1) * self.obs_scales["lin_vel"],
-                 ob), axis=1)
+        # if self.cfg["env"]["observe_only_lin_vel"]:
+        #     ob = np.concatenate(
+        #         (self.body_linear_vel.reshape(1, -1) * self.obs_scales["lin_vel"],
+        #          ob), axis=1)
 
         if self.cfg["env"]["observe_yaw"]:
             heading = self.se.get_yaw()
@@ -200,7 +200,7 @@ class LCMAgent():
         self.joint_vel_target = np.zeros(12)
         # print(f'cjp {self.joint_pos_target}')
 
-        command_for_robot.q_des = joint_pos_target[inv_joint_idx]
+        command_for_robot.q_des = joint_pos_target
         command_for_robot.qd_des = self.joint_vel_target
         command_for_robot.kp = self.p_gains
         command_for_robot.kd = self.d_gains

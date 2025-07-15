@@ -283,6 +283,14 @@ class StateEstimator:
 
         self.euler = np.array(msg.rpy)
 
+        # # Manually integrate for world velocity
+        # current_time = time.time()
+        # dt = current_time - self.timuprev
+
+        # if self.received_first_legdata:
+        #     acceleration_world = np.array(msg.aWorld)
+        #     self.world_lin_vel += acceleration_world * dt
+
         self.R = get_rotation_matrix_from_rpy(self.euler)
 
         self.contact_state = 1.0 * (np.array(msg.contact_estimate) > 200)
@@ -294,6 +302,9 @@ class StateEstimator:
 
         self.buf_idx += 1
         self.euler_prev = np.array(msg.rpy)
+
+        # print('WORLD LIN VEL', self.world_lin_vel)
+        # print('ACCELERATION', msg.aWorld)
 
     def _sensor_cb(self, channel, data):
         pass
