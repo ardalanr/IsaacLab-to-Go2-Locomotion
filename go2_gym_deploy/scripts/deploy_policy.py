@@ -7,6 +7,7 @@ from go2_gym_deploy.utils.deployment_runner import DeploymentRunner
 from go2_gym_deploy.envs.lcm_agent import LCMAgent
 from go2_gym_deploy.utils.cheetah_state_estimator import StateEstimator
 from go2_gym_deploy.utils.command_profile import *
+import numpy as np
 
 import pathlib
 
@@ -21,9 +22,9 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
 # with open(logdir+"/parameters.pkl", 'rb') as file:
     with open(logdir+"/parameters_isaaclab.pkl", 'rb') as file:
         pkl_cfg = pkl.load(file)
-        print(pkl_cfg.keys())
+        # print(pkl_cfg.keys())
         cfg = pkl_cfg["Cfg"]
-        print(cfg.keys())
+        print(cfg["control"]["action_scale"])
 
     print('Config successfully loaded!')
 
@@ -61,7 +62,7 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
 
 def load_policy(logdir):
     # try ------------------
-    body = torch.jit.load(logdir + '/checkpoints/policy_rough_ac.pt')
+    body = torch.jit.load(logdir + '/checkpoints/policy_rough_ac_dr.pt')
     # body = torch.jit.load(logdir + '/checkpoints/policy.pt')
     # body = torch.jit.load(logdir + '/checkpoints/body_latest.jit')
 
@@ -81,6 +82,13 @@ def load_policy(logdir):
         # input_tensor = torch.cat((obs["obs_history"].to('cpu'), latent), dim=-1)
         action = body.forward(obs["obs"].to('cpu'))
         info['latent'] = None
+        # action = np.array([0, 0.3, -0.7, 0, 0.3, -0.7, 0, 0.3, -0.7, 0, 0.3, -0.7])[:np.newaxis]
+        # action = np.array([0., 0., 0., 0.,
+        #                    0.3, 0.3, 0.3, 0.3,
+        #                    -0.7, -0.7, -0.7, -0.7,])
+        # action = torch.from_numpy(action)
+        # action = torch.zeros_like(action)
+        # action[:, 11] = 2
         return action
 
     return policy
