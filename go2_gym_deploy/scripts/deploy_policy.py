@@ -62,12 +62,12 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
 
 def load_policy(logdir):
     # try ------------------
-    body = torch.jit.load(logdir + '/checkpoints/policy_rough_ac_dr.pt')
+    body = torch.jit.load(logdir + '/checkpoints/policy717.pt')
     # body = torch.jit.load(logdir + '/checkpoints/policy.pt')
     # body = torch.jit.load(logdir + '/checkpoints/body_latest.jit')
 
     import os
-    adaptation_module = torch.jit.load(logdir + '/checkpoints/adaptation_module_latest.jit').to('cpu')
+    # adaptation_module = torch.jit.load(logdir + '/checkpoints/adaptation_module_latest.jit').to('cpu')
 
     # print("--- Body Graph ---")
     # print(body._get_method("forward").graph)
