@@ -54,11 +54,11 @@ class StateEstimator:
         
         # 这里腿的顺序为什么要转换？
         # reverse legs
-        # self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+        self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
         # self.joint_idxs = [0, 2, 1, 3, 4, 6, 5, 7, 8, 10, 9, 11]  #   <--- IsaacLab policy
         self.contact_idxs = [1, 0, 3, 2]
         # import pdb; pdb.set_trace()
-        self.joint_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        # self.joint_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         # self.joint_idxs = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11] # Mujoco to IsaacLab
         # self.joint_idxs = [0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11] # IsaacLab to Mujoco
         # self.joint_idxs = [0, 2, 1, 3, 4, 6, 5, 7, 8, 10, 9, 11] # go2_config.py to isaac lab

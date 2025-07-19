@@ -134,15 +134,23 @@ class LCMAgent():
         self.dof_vel = self.se.get_dof_vel()
         self.body_linear_vel = self.se.get_body_linear_vel()
         self.body_angular_vel = self.se.get_body_angular_vel()
+        # import pdb; pdb.set_trace()
 
+        muj_flipped_legs_to_isaac = [9, 1, 4, 0, 3, 6, 5, 8, 11, 7, 10, 2]
+        muj_to_isaac = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11]
+
+        # 0.1, -0.1, 0.1, -0.1, 0.8, 0.8, 1.0, 1.0, -1.5, -1.5, -1.5, -1.5
+        # import pdb; pdb.set_trace()
         ob = np.concatenate(( 
-                             self.body_angular_vel.reshape(1, -1)*self.obs_scales["ang_vel"], 
+                             self.body_angular_vel.reshape(1, -1), 
                              self.gravity_vector.reshape(1, -1),
-                             self.commands * self.commands_scale,
-                             (self.dof_pos[joint_idx] - self.default_dof_pos[joint_idx]).reshape(1, -1) * self.obs_scales["dof_pos"],
-                             self.dof_vel[joint_idx].reshape(1, -1) * self.obs_scales["dof_vel"],
-                             torch.clip(self.actions, -self.cfg["normalization"]["clip_actions"],
-                                        self.cfg["normalization"]["clip_actions"]).cpu().detach().numpy().reshape(1, -1)
+                             self.commands,
+                            #  np.array([[0, 0, 0]]),
+                             (self.dof_pos[muj_to_isaac] - self.default_dof_pos[muj_to_isaac]).reshape(1, -1),
+                             self.dof_vel[muj_to_isaac].reshape(1, -1),
+                             self.last_actions.cpu().detach().numpy().reshape(1, -1)
+                            #  torch.clip(self.actions, -self.cfg["normalization"]["clip_actions"],
+                            #             self.cfg["normalization"]["clip_actions"]).cpu().detach().numpy().reshape(1, -1)
                              ), axis=1)
 
         if self.cfg["env"]["observe_two_prev_actions"]:
@@ -189,6 +197,8 @@ class LCMAgent():
 
     def publish_action(self, action, hard_reset=False, inv_joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
 
+        muj_to_muj_flipped_legs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+
         command_for_robot = pd_tau_targets_lcmt()
         self.joint_pos_target = \
             (action[0, :12].detach().cpu().numpy() * self.cfg["control"]["action_scale"]).flatten()
@@ -196,7 +206,8 @@ class LCMAgent():
         # self.joint_pos_target[[0, 3, 6, 9]] *= -1
         self.joint_pos_target = self.joint_pos_target[inv_joint_idx]
         self.joint_pos_target += self.default_dof_pos
-        joint_pos_target = self.joint_pos_target[self.joint_idxs]
+        self.joint_pos_target = self.joint_pos_target[muj_to_muj_flipped_legs]
+        joint_pos_target = self.joint_pos_target
         self.joint_vel_target = np.zeros(12)
         # print(f'cjp {self.joint_pos_target}')
 
@@ -227,6 +238,7 @@ class LCMAgent():
         self.gait_indices = torch.zeros(self.num_envs, dtype=torch.float)
 
     def step(self, actions, hard_reset=False, joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], inv_joint_idx=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
+        # print('GOT HERE', joint_idx, inv_joint_idx)
         clip_actions = self.cfg["normalization"]["clip_actions"]
         self.last_actions = self.actions[:]
         self.actions = torch.clip(actions[0:1, :], -clip_actions, clip_actions)

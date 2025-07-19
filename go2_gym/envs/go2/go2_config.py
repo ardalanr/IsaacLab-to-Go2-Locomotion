@@ -13,7 +13,7 @@ def config_go2(Cnfg: Union[Cfg, Meta]):
         'FL_hip_joint': 0.1,  # [rad]
         'RL_hip_joint': 0.1,  # [rad]
         'FR_hip_joint': -0.1,  # [rad]
-        'RR_hip_joint': -0.1,  # [rad]
+        'RR_hip_joint': -0.1,  # [rad]                             
 
         'FL_thigh_joint': 0.8,  # [rad]
         'RL_thigh_joint': 1.,  # [rad]
@@ -31,7 +31,7 @@ def config_go2(Cnfg: Union[Cfg, Meta]):
     _.stiffness = {'joint': 25.}  # [N*m/rad] 关节PD参数有待调整 
     _.damping = {'joint': 0.6}  # [N*m*s/rad] 关节PD参数有待调整 
     # action scale: target angle = actionScale * action + defaultAngle
-    _.action_scale = 0.25
+    _.action_scale = 0.05
     _.hip_scale_reduction = 0.5
     # decimation: Number of control action updates @ sim DT per policy DT
     _.decimation = 4
@@ -69,7 +69,7 @@ def config_go2(Cnfg: Union[Cfg, Meta]):
     _.curriculum = False
 
     _ = Cnfg.env
-    _.num_observations = 42
+    _.num_observations = 45
     _.observe_vel = False
     _.num_envs = 4096
 

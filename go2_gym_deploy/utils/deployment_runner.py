@@ -70,9 +70,13 @@ class DeploymentRunner:
                 agent.get_obs()
                 joint_pos = agent.dof_pos
                 if low:
-                    final_goal = np.array([0., 0., 0., 0.,
-                                           0.3, 0.3, 0.3, 0.3,
-                                           -0.7, -0.7, -0.7, -0.7,])
+                    final_goal = np.array([0., 0.3, -0.7,
+                                           0., 0.3, -0.7,
+                                           0., 0.3, -0.7,
+                                           0., 0.3, -0.7,])
+                    # final_goal = np.array([0., 0., 0., 0.,
+                    #                        0.3, 0.3, 0.3, 0.3,
+                    #                        -0.7, -0.7, -0.7, -0.7,])
                 else:
                     final_goal = np.zeros(12)
                 nominal_joint_pos = agent.default_dof_pos
@@ -143,12 +147,14 @@ class DeploymentRunner:
             for i in range(max_steps):
 
                 policy_info = {}
-                # import pdb; pdb.set_trace()
-                control_obs = self.agents['hardware_closed_loop'].get_obs(joint_idx=[0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11])
+                # control_obs = self.agents['hardware_closed_loop'].get_obs(joint_idx=[0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11])
+                # control_obs = self.agents['hardware_closed_loop'].get_obs(joint_idx=[9, 1, 4, 0, 3, 6, 5, 8, 11, 7, 10, 2])
                 action = self.policy(control_obs, policy_info)
 
                 for agent_name in self.agents.keys():
                     obs, ret, done, info = self.agents[agent_name].step(action, joint_idx=[0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11], inv_joint_idx=[0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11])
+                    # obs, ret, done, info = self.agents[agent_name].step(action, joint_idx=[9, 1, 4, 0, 3, 6, 5, 8, 11, 7, 10, 2], inv_joint_idx=[1, 5, 9, 0, 4, 8, 3, 7, 11, 2, 6, 10])
+
 
                     info.update(policy_info)
                     info.update({"observation": obs, "reward": ret, "done": done, "timestep": i,
