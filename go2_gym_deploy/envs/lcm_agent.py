@@ -64,7 +64,7 @@ class LCMAgent():
             "FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
             "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint",
             "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
-            "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint", ]
+            "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint", ] # Mujoco joint order
         self.default_dof_pos = np.array([self.cfg["init_state"]["default_joint_angles"][name] for name in joint_names])
         try:
             self.default_dof_pos_scale = np.array([self.cfg["init_state"]["default_hip_scales"], self.cfg["init_state"]["default_thigh_scales"], self.cfg["init_state"]["default_calf_scales"],
@@ -201,13 +201,12 @@ class LCMAgent():
 
         command_for_robot = pd_tau_targets_lcmt()
         self.joint_pos_target = \
-            (action[0, :12].detach().cpu().numpy() * self.cfg["control"]["action_scale"]).flatten()
-        self.joint_pos_target[[0, 1, 2, 3]] *= self.cfg["control"]["hip_scale_reduction"]
-        # self.joint_pos_target[[0, 3, 6, 9]] *= -1
-        self.joint_pos_target = self.joint_pos_target[inv_joint_idx]
-        self.joint_pos_target += self.default_dof_pos
-        self.joint_pos_target = self.joint_pos_target[muj_to_muj_flipped_legs]
-        joint_pos_target = self.joint_pos_target
+            (action[0, :12].detach().cpu().numpy() * self.cfg["control"]["action_scale"]).flatten() # IsaacLab order
+        self.joint_pos_target[[0, 1, 2, 3]] *= self.cfg["control"]["hip_scale_reduction"] # In the IsaacLab order, hips are the first 4 entries
+        self.joint_pos_target = self.joint_pos_target[inv_joint_idx] # IsaacLab --> Mujoco
+        self.joint_pos_target += self.default_dof_pos # Mujoco order
+        self.joint_pos_target = self.joint_pos_target[muj_to_muj_flipped_legs] # Mujoco --> Output format (Mujoco flipped legs)
+        joint_pos_target = self.joint_pos_target # Output format
         self.joint_vel_target = np.zeros(12)
         # print(f'cjp {self.joint_pos_target}')
 
@@ -226,6 +225,7 @@ class LCMAgent():
 
         self.torques = (self.joint_pos_target - self.dof_pos) * self.p_gains + (self.joint_vel_target - self.dof_vel) * self.d_gains
         # 由lcm将神经网络输出的action传入c++ sdk
+        # Translation: The action output by the neural network is passed to the c++ sdk by lcm
         lc.publish("pd_plustau_targets", command_for_robot.encode())
 
     def reset(self):
