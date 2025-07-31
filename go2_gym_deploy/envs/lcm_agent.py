@@ -224,7 +224,7 @@ class LCMAgent():
 
 
         self.torques = (self.joint_pos_target - self.dof_pos) * self.p_gains + (self.joint_vel_target - self.dof_vel) * self.d_gains
-        # 由lcm将神经网络输出的action传入c++ sdk
+
         # Translation: The action output by the neural network is passed to the c++ sdk by lcm
         lc.publish("pd_plustau_targets", command_for_robot.encode())
 
@@ -275,7 +275,7 @@ class LCMAgent():
         # self.clock_inputs[:, 2] = torch.sin(2 * np.pi * self.foot_indices[2])
         # self.clock_inputs[:, 3] = torch.sin(2 * np.pi * self.foot_indices[3])
 
-# 注释掉了下面camera相关代码
+
 # --------------------------------------------------------------------
         # images = {'front': self.se.get_camera_front(),
         #           'bottom': self.se.get_camera_bottom(),
