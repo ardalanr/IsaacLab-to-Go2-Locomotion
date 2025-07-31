@@ -1,0 +1,74 @@
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# Documentation and media (not needed for deployment)
+README.md
+LICENSE
+LICENSES/
+media/
+*.md
+!JETSON_DEPLOYMENT.md
+!PC_TESTING.md
+
+# Keep setup.py for package installation
+!setup.py
+
+# Training-related directories (not needed for deployment)
+go2_gym/
+go2_gym_learn/
+scripts/
+resources/
+
+# Logs and temporary files
+logs/
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Build artifacts (will be rebuilt in container)
+go2_gym_deploy/build/
+*.egg-info/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker files (to avoid recursive copying)
+Dockerfile*
+docker-compose.yml
+.dockerignore
+
+# Test and deployment scripts (not needed inside container)
+test_on_pc.sh
+deploy_on_jetson*.sh
+
+# Large files that aren't needed for deployment
+runs/gait-conditioned-agility/pretrain-go2/train/*/outputs.log
+runs/gait-conditioned-agility/pretrain-go2/train/*/metrics.pkl
+runs/gait-conditioned-agility/pretrain-go2/train/*/videos/
+runs/gait-conditioned-agility/pretrain-go2/train/*/curriculum/
+runs/gait-conditioned-agility/pretrain-go2/train/*/edit_pickle.ipynb
+
+# Exclude other parameter files (keep only the one needed for deployment)
+runs/gait-conditioned-agility/pretrain-go2/train/*/parameters.pkl
+runs/gait-conditioned-agility/pretrain-go2/train/*/parameters_cpu.pkl 

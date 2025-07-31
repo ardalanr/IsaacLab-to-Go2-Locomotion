@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  go2-rl-deploy:
+    build: .
+    container_name: go2-rl-deploy
+    privileged: true
+    network_mode: host
+    volumes:
+      - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev:/dev
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    runtime: nvidia
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+    stdin_open: true
+    tty: true
+    command: /bin/bash 

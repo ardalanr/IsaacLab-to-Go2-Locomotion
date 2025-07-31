@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/sport_client_example.dir/example/client/sport_client_example.cpp.o"
+  "CMakeFiles/sport_client_example.dir/example/client/sport_client_example.cpp.o.d"
   "sport_client_example"
   "sport_client_example.pdb"
 )

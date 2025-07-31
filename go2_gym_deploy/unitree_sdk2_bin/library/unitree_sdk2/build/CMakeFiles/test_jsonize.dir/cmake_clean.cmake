@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/test_jsonize.dir/example/jsonize/test_jsonize.cpp.o"
+  "CMakeFiles/test_jsonize.dir/example/jsonize/test_jsonize.cpp.o.d"
   "test_jsonize"
   "test_jsonize.pdb"
 )

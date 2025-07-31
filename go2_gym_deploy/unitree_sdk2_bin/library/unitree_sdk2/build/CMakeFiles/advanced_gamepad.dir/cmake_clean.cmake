@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/advanced_gamepad.dir/example/advanced_gamepad/main.cpp.o"
+  "CMakeFiles/advanced_gamepad.dir/example/advanced_gamepad/main.cpp.o.d"
   "advanced_gamepad"
   "advanced_gamepad.pdb"
 )

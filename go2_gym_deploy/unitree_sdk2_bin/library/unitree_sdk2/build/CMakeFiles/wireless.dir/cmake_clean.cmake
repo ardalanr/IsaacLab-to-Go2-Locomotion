@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/wireless.dir/example/wireless/wireless.cpp.o"
+  "CMakeFiles/wireless.dir/example/wireless/wireless.cpp.o.d"
   "wireless"
   "wireless.pdb"
 )

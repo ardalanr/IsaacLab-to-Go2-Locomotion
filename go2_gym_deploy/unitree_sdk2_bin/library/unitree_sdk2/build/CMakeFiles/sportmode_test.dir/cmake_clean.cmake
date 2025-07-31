@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/sportmode_test.dir/example/high_level/sportmode_test.cpp.o"
+  "CMakeFiles/sportmode_test.dir/example/high_level/sportmode_test.cpp.o.d"
   "sportmode_test"
   "sportmode_test.pdb"
 )

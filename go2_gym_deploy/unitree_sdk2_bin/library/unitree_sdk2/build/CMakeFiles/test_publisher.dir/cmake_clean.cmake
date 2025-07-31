@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/test_publisher.dir/example/helloworld/HelloWorldData.cpp.o"
+  "CMakeFiles/test_publisher.dir/example/helloworld/HelloWorldData.cpp.o.d"
   "CMakeFiles/test_publisher.dir/example/helloworld/publisher.cpp.o"
+  "CMakeFiles/test_publisher.dir/example/helloworld/publisher.cpp.o.d"
   "test_publisher"
   "test_publisher.pdb"
 )

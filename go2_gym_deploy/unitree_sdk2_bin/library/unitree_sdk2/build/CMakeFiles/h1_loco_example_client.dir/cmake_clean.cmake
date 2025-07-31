@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/h1_loco_example_client.dir/example/humanoid/high_level/h1_loco_example_client.cpp.o"
+  "CMakeFiles/h1_loco_example_client.dir/example/humanoid/high_level/h1_loco_example_client.cpp.o.d"
   "h1_loco_example_client"
   "h1_loco_example_client.pdb"
 )
