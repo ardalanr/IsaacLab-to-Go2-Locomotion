@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update
 
 # Install basic build tools
-RUN apt-get install -y build-essential cmake git
+RUN apt-get install -y build-essential cmake git python3-pip
 
 # # Install Python 3.8 from official Python.org (safer alternative)
 # RUN apt-get install -y libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev
