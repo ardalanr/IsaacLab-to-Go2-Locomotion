@@ -1,10 +1,10 @@
-# Sim-to-Real project on Unitree Go2
+# Sim-to-Real RL Policy Deployment Unitree Go2
 
 ## Overview 
 
-This repository is forked from [walk-these-ways](https://github.com/Improbable-AI/walk-these-ways), which is a Go1 Sim-to-Real Locomotion Starter Kit. It seems that [walk-these-ways](https://github.com/Improbable-AI/walk-these-ways) can be untilized on Unitree [A1](https://github.com/fan-ziqi/dog_rl_deploy) with simple modifications, since those robots are base on [unitree-legged-sdk](https://github.com/unitreerobotics/unitree_legged_sdk). 
+This repository is forked from [walk-these-ways-go2](https://github.com/Teddy-Liao/walk-these-ways-go2), which is a Go2 Sim-to-Real locomotion pipeline. 
 
-However, the brand-new architecture [unitree-sdk2 ](https://github.com/unitreerobotics/unitree_sdk2)is not based on UDP anymore, so this project aims to train and deploy walk-these-ways on Unitree Go2 by modifying SDK interfaces.
+This project aims to train and deploy RL locomotion policies trained using IsaacLab using the [walk-these-ways](https://github.com/Improbable-AI/walk-these-ways) code on the Unitree Go2.
 
 ## Requirements 
 * miniconda
@@ -12,42 +12,7 @@ However, the brand-new architecture [unitree-sdk2 ](https://github.com/unitreero
 * Isaac Gym
 * Nvidia GPU with at least 8GB of VRAM
 
----
-## Train and Play
-Clone this repository and install:
-
-``` bash
-git clone https://github.com/Teddy-Liao/walk-these-ways-go2.git
-cd walk-these-ways-go2
-pip install -e .
-```
-
-Start training: 
-```bash
-python scripts/train.py
-```
-
-`go2_gym` and `go2_gym_learn` folders are the main folders for training process.
-
-Play the model:
-```bash
-cd scripts
-python play.py
-```
-![Alt text](media/go2_training.jpg)
-
-Go2 pretrained model is provided in [./runs](runs/gait-conditioned-agility/pretrain-go2), you can choose whether to use provide pretrained model by modifying the label line `label = "gait-conditioned-agility/pretrain-go2/train"` to your own trained model.
-
-### Known Issues
-* `flip_visual_attachments` in [go2_config](go2_gym/envs/go2/go2_config.py) should be set to `True`, otherwise errors would occur when visualizing.
-* To change configuration parameters of env or the robot, you should modify parameters in [go2_config](go2_gym/envs/go2/go2_config.py), not in [legged_robot_config](go2_gym/envs/base/legged_robot_config.py)
-
-
----
-## Deploy on PC
-Trained policy is only supported to be deployed through your PC or laptop now, because I am not familiar with Jetson Orin, and hope I can fix it and deploy on Jetson Orin.
-
-### Requirements
+### Dependencies
 #### Install LCM
 Since [walk-these-ways](https://github.com/Improbable-AI/walk-these-ways) implement an interface based on Lightweight Communications and Marshalling ([LCM](https://github.com/lcm-proj/lcm)) to pass sensor data, motor commands, and joystick state between their code and the low-level control SDK provided by Unitree, LCM should be installed firstly in your PC or laptlop.
 
@@ -78,6 +43,15 @@ mkdir build
 cd build
 cmake ..
 make
+```
+
+---
+Clone this repository and install:
+
+``` bash
+git clone https://github.com/ardalanr/walk-these-ways-go2.git
+cd walk-these-ways-go2
+pip install -e .
 ```
 
 ### Build lcm_position_go2
@@ -112,20 +86,8 @@ ifconfig
 ```
 If error occurs, please check [Unitree Support](https://support.unitree.com/home/zh/developer/Quick_start) for details.
 
-### Test communication between LCM and unitree_sdk2
-You can verify LCM send by opening a new terminal:
-```bash
-cd go2_gym_deploy/build
-sudo ./lcm_receive
-```
-
-If LCM and unitree_sdk2 are correctly connected with each other, messages will be shown in the terminal:
-
-![Alt text](media/lcm_receive.png)
-
 ### Start LCM
-Before starting LCM, ensure that lcm_receive has been properly shut down. 
-**It's important not to run lcm_receive and lcm_position_go2 simultaneously.**
+Before starting LCM, ensure that AI sport mode is disabled. 
 
 ```bash
 cd go2_gym_deploy/build
@@ -133,7 +95,9 @@ sudo ./lcm_position_go2 eth0
 ```
 Replace `eth0` with your own network interface address. According to the messages shown in terminal, press `Enter` for several times and the communication between LCM and unitree_sdk2 will set up.
 
-This command will automatically shut down Unitree sport_mode Service and set the robot to LOW-LEVEL. Please make sure This will Go2 is hung up or lie on the ground.
+This command will automatically shut down the Unitree sport_mode Service and set the robot to LOW-LEVEL. Please make sure This will Go2 is hung up or lie on the ground.
+
+**At this point, no sport mode service should be enabled.**
 
 
 ### Load and run policy
@@ -142,7 +106,7 @@ Open a new terminate and run:
 cd go2_gym_deploy/scripts
 python deploy_policy.py
 ```
-According to the hints shown in terminal, Press button [R2] to start the controller. You can check RC mapping in the following subsection.
+Press the [R2] button to start the controller. You can check RC mapping in the following subsection.
 
 
 ### Joystick Mapping
@@ -150,22 +114,17 @@ According to the hints shown in terminal, Press button [R2] to start the control
 ![Joystick Mapping](media/rc_map.png)
 
 
-To view the details of joystick mapping or even modify default mapping logic, please refer to the `get_command` function within the [cheetah_state_estimator.py](go2_gym_deploy/utils/cheetah_state_estimator.py) file. In this project, the default gait is set to trot.
+To view the details of joystick mapping or even modify default mapping logic, please refer to the `get_command` function within the [cheetah_state_estimator.py](go2_gym_deploy/utils/cheetah_state_estimator.py) file. 
 
 
 **Caution**:
 * Press [L2+B] to switch to damping mode if any unexpected situation occurs!!!
-* This is research code; use at your own risk; we do not take responsibility for any damage.
-
-Test Video on Unitree Go2: 
-- Test in my bedroom: https://www.bilibili.com/video/BV1tQ4y1c7ZG/?spm_id_from=333.999.0.0&vd_source=07873ebe2a113dac57775e264a210929
-- Test by other contributors: https://www.bilibili.com/video/BV1Ut421H7Fr/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=07873ebe2a113dac57775e264a210929
-
+* This is research code; use at your own risk. We do not take responsibility for any damage.
 
 ---
 ## Deploy on Nvidia Jetson Orin
 
-The Unitree Go2 robot is equipped with an onboard Nvidia Jetson Orin Nano/NX, which operates on an ARM-based architecture. Default information of this onboard computer is shown below, and you can connnect to Jetson by SSH, VScode(remote development) or plugging a HDMI cable.
+The Unitree Go2 robot is equipped with an onboard Nvidia Jetson Orin Nano/NX, which operates on an ARM-based architecture. The default information of this onboard computer is shown below, and you can connnect to Jetson by SSH, VScode (remote development) or plugging in an HDMI cable.
 
 ```
 IP:192.168.123.18
@@ -227,26 +186,13 @@ Personally, I recommend to install cuda-11.8. Click the link, [CUDA Toolkit 11.8
 
 Please [download](https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048) pre-built PyTorch pip wheel installers for Jetson Nano, which is different from the way we install Pytorch on PC. Note that correct pytorch version should be chosen to make it compatible with specific version of cuda and Jetpack. 
 
+#### Install LCM for Jetson
+The latest version of LCM (1.5.1) is incompatible with Ubuntu 20.04, so you must install version 1.5.0 using the same method as above.
+
 #### Run codes without cable
 As long as the environment and requirements on the Jetson are properly configured, you can follow the same deployment guidelines as you would on a PC. This liberates the robot! Now, you can test the code cable-free, offering more freedom to the robot's movements and applications.
 
-### Through Docker
+## Credits
 
-To be continue ...
-
---- 
-
-🌟🌟🌟  **Please star this repository if it does help you! Many Thanks!** 🌟🌟🌟 
-
-
----
-## Acknowledgements
-* Many thanks to [Leolar](https://github.com/NihaoyaLeolar), who provide Nvidia 3060ti and supporting.
-* Many thanks to [Jony](https://github.com/jonyzhang2023) and Peter for their support and encourage me to learn basic kownledge about RL.
-* Many thanks to [Simonforyou](https://github.com/Simonforyou), who provide Go2 pretrained model.
-
----
-## TO DO
-- [x] Do not inherit config and env from go1_gym, build customized config and env files for Go2
-- [x] Deploy on Jeston Orin Nano
-- [ ] Deploy through Docker
+This project is a fork of the `go2_gym` repository by Dengting Liao. 
+It has been modified by [Your Name] to include [brief description of your changes].
