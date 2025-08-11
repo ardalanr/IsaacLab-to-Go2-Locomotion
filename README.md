@@ -195,4 +195,4 @@ As long as the environment and requirements on the Jetson are properly configure
 ## Credits
 
 This project is a fork of the `go2_gym` repository by Dengting Liao. 
-It has been modified by [Your Name] to include [brief description of your changes].
+It has been modified by Ryan Ardalan to include support for IsaacLab-trained RL Locomotion policies.
